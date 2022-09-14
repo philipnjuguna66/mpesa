@@ -13,16 +13,20 @@ abstract class DarajaService
 
     private Client $client;
 
-    public function __construct()
+    public function __construct(array $overrides = [])
     {
-        $this->client = new Client([
+
+        $defaults = [
             'base_uri' => $this->getBaseUrl(),
             'timeout' => 2.0,
             'http_errors' => true,
             'headers' => [
                 "Content-Type" => ["application/json"],
             ]
-        ]);
+        ];
+        $config = array_merge($overrides, $defaults);
+
+        $this->client = new Client($config);
 
     }
 
@@ -41,7 +45,7 @@ abstract class DarajaService
     /**
      * @return Client
      */
-    public function getClient(): Client
+    protected function getClient(): Client
     {
         return $this->client;
     }
@@ -93,7 +97,7 @@ abstract class DarajaService
 
     protected function getSandBoxPublicKey(): bool|string
     {
-        return file_get_contents(__DIR__ . './Configs/mpesa_public_cert.cer');
+        return file_get_contents(__DIR__ . '/Configs/mpesa_public_cert.cer');
     }
 
     protected function getLiveEncryptedPasswd($plaintext)
@@ -105,7 +109,7 @@ abstract class DarajaService
 
     protected function getLivePublicKey(): bool|string
     {
-        return file_get_contents(__DIR__ . './Configs/mpesa_public_cert.cer');
+        return file_get_contents(__DIR__ . '/Configs/mpesa_public_cert.cer');
     }
 
 }

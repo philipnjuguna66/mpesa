@@ -13,21 +13,21 @@ class  PinLessDealer extends DarajaService
 
     protected Configs\BaseConfig $config;
 
-    public function __construct(private PinLessDealerConfig $configuration)
+    public function __construct(private PinLessDealerConfig $configuration,array $overrides = [])
     {
         $this->config = $this->configuration;
 
-        parent::__construct();
+        parent::__construct($overrides);
 
     }
 
     /**
      * @throws GuzzleException
      */
-    public function c2sRecharge(string $phoneNumber, int $amount): \Psr\Http\Message\ResponseInterface
+    public function c2sRecharge(string $phoneNumber, int $amountInKsh): \Psr\Http\Message\ResponseInterface
     {
         $requestData = [
-            'amount' => $amount * 100, //convert to cents
+            'amount' => $amountInKsh * 100, //convert to cents
             'senderMsisdn' => $this->config->senderMsisdn, // 748248717
             'servicePin' => base64_encode($this->config->servicePin), // 9090
             'receiverMsisdn' => $phoneNumber,

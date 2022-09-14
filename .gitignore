@@ -4,3 +4,5 @@ docs
 vendor
 coverage
 .idea
+.run
+.phpunit.result.cache

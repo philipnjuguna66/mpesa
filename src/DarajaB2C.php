@@ -6,17 +6,18 @@ namespace Rickodev\Mpesa;
 
 
 use GuzzleHttp\Exception\GuzzleException;
+
 use Rickodev\Mpesa\Configs\B2cConfig;
 
 class DarajaB2C extends DarajaService
 {
     protected Configs\BaseConfig $config;
 
-    public function __construct(private B2cConfig $configuration)
+    public function __construct(private B2cConfig $configuration,array $overrides = [])
     {
         $this->config = $this->configuration;
 
-        parent::__construct();
+        parent::__construct($overrides);
     }
 
     /**

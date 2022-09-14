@@ -12,11 +12,11 @@ class DarajaC2B extends DarajaService
 
     protected Configs\BaseConfig $config;
 
-    public function __construct(private C2BConfig $configuration)
+    public function __construct(private C2BConfig $configuration,array $overrides = [])
     {
         $this->config = $this->configuration;
 
-        parent::__construct();
+        parent::__construct($overrides);
 
     }
 
@@ -24,13 +24,13 @@ class DarajaC2B extends DarajaService
     /**
      * @throws GuzzleException
      */
-    public function registerUrls($response_type = "Completed"): \Psr\Http\Message\ResponseInterface
+    public function registerUrls(): \Psr\Http\Message\ResponseInterface
     {
         $version = $this->config->version;
 
         $requestData = [
             'ShortCode' => $this->config->shortCode,
-            'ResponseType' => $response_type,
+            'ResponseType' => 'Completed',
             'ConfirmationURL' => $this->config->confirmationUrl,
             'ValidationURL' => $this->config->validationUrl,
         ];

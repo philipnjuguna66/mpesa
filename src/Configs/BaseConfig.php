@@ -4,8 +4,8 @@ namespace Rickodev\Mpesa\Configs;
 
 abstract class BaseConfig
 {
-    public string $environment = 'sandbox';
-    public string $key;
-    public string $secret;
+    public function __construct(public string $key,public string $secret,public string $environment = 'sandbox')
+    {
+    }
 
 }
