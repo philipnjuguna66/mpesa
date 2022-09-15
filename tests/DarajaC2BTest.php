@@ -2,12 +2,14 @@
 
 namespace Rickodev\Mpesa\Tests;
 
+use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use Rickodev\Mpesa\Configs\C2BConfig;
 use Rickodev\Mpesa\DarajaC2B;
+use Rickodev\Mpesa\Models\C2BV1Result;
 
 class DarajaC2BTest extends \PHPUnit\Framework\TestCase
 {
@@ -61,6 +63,54 @@ class DarajaC2BTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals('36140-27770309-1',$object->OriginatorCoversationID);
         $this->assertEquals('0',$object->ResponseCode);
         $this->assertEquals('Success',$object->ResponseDescription);
+    }
+
+
+    /**
+     * @throws GuzzleException
+     */
+    public function test_cb2_v1_successful_validation_or_confirmation_results()
+    {
+        $validationResponseBody = [
+            "TransactionType" => "Pay Bill",
+            "TransID" => "RKTQDM7W6S",
+            "TransTime" => "20191122063845",
+            "TransAmount" => "10",
+            "BusinessShortCode" => "600638",
+            "BillRefNumber" => "254708374149",
+            "InvoiceNumber" => "",
+            "OrgAccountBalance" => "49197.00",
+            "ThirdPartyTransID" => "",
+            "MSISDN" => "254708374149",
+            "FirstName" => "John",
+            "MiddleName" => "",
+            "LastName" => "Doe"
+        ];
+
+        $callbackResponseMock = new MockHandler([
+            new Response(200,body:json_encode($validationResponseBody)),
+            new Response(200,body:json_encode($validationResponseBody)),
+        ]);
+
+        $webHookInvoker = new Client(['handler' => $callbackResponseMock]);
+
+        $ValidationResponse =     $webHookInvoker->post('https://mydomain.com/validation',[
+            'json'=>$validationResponseBody
+        ]);
+
+        $ConfirmationResponse =     $webHookInvoker->post('https://mydomain.com/confimation',[
+            'json'=>$validationResponseBody
+        ]);
+
+        $ValidationResponseBody =  $ValidationResponse->getBody()->getContents();
+        $ConfirmationResponseBody =  $ConfirmationResponse->getBody()->getContents();
+
+        $ValidationResponseBodyObject = json_decode($ValidationResponseBody);
+
+        $ConfirmationResponseBodyObject = json_decode($ConfirmationResponseBody);
+
+        $this->assertInstanceOf(C2BV1Result::class,C2BV1Result::fromResponse($ValidationResponseBodyObject));
+        $this->assertInstanceOf(C2BV1Result::class,C2BV1Result::fromResponse($ConfirmationResponseBodyObject));
 
     }
 

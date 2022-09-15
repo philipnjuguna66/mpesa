@@ -29,11 +29,7 @@ class DarajaB2C extends DarajaService
 
         $encryptedPassword = $this->isLive() ? $this->getLiveEncryptedPasswd($this->config->initiatorPassword) : $this->getSandBoxEncryptedPasswd($this->config->initiatorPassword);
 
-        $phone = (str_starts_with($phone, "+")) ? str_replace("+", "", $phone) : $phone;
-        $phone = (str_starts_with($phone, "0")) ? preg_replace("/^0/", "254", $phone) : $phone;
-        $phone = (str_starts_with($phone, "7")) ? "254{$phone}" : $phone;
-
-        $phone = $this->isLive() ? $phone : "254708374149";
+        $phone = $this->isLive() ? format_safaricom_number($phone) : "254708374149";
 
         $requestData = array(
             "InitiatorName" => $this->config->initiatorName,

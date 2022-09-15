@@ -24,9 +24,7 @@ class DarajaStk extends DarajaService
     public function send(string $phone, int $amount, string $reference = "test", string $description = "Transaction Description", string $remark = "Remarks"): \Psr\Http\Message\ResponseInterface
     {
 
-        $phone = (str_starts_with($phone, "+")) ? str_replace("+", "", $phone) : $phone;
-        $phone = (str_starts_with($phone, "0")) ? preg_replace("/^0/", "254", $phone) : $phone;
-        $phone = (str_starts_with($phone, "7")) ? "254{$phone}" : $phone;
+        $phone = format_safaricom_number($phone);
 
         $timestamp = date("YmdHis");
 
