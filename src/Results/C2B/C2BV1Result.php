@@ -1,8 +1,10 @@
 <?php
 
-namespace Rickodev\Mpesa\Models;
+namespace Rickodev\Mpesa\Results\C2B;
 
-class C2BV1Result
+use Rickodev\Mpesa\Results\BaseResult;
+
+class C2BV1Result implements BaseResult
 {
 
     public function __construct(
@@ -14,7 +16,7 @@ class C2BV1Result
         public string  $BillRefNumber,
         public ?string $InvoiceNumber,
         public string  $OrgAccountBalance,
-        public string  $ThirdPartyTransID,
+        public ?string  $ThirdPartyTransID,
         public string  $MSISDN,
         public string  $FirstName,
         public ?string $MiddleName,
@@ -25,7 +27,7 @@ class C2BV1Result
 
     }
 
-   public  static function fromResponse(object $responseBody):self {
+   public  static function fromResponseObject(object $responseBody):self {
 
         return  new self(
             TransactionType: $responseBody->TransactionType,
@@ -45,4 +47,28 @@ class C2BV1Result
 
     }
 
+    public  static function fromResponseArray(array $responseBody):self {
+
+        return  new self(
+            TransactionType: $responseBody['TransactionType'],
+            TransID: $responseBody['TransID'],
+            TransTime: $responseBody['TransTime'],
+            TransAmount: $responseBody['TransAmount'],
+            BusinessShortCode: $responseBody['BusinessShortCode'],
+            BillRefNumber: $responseBody['BillRefNumber'],
+            InvoiceNumber: $responseBody['InvoiceNumber'],
+            OrgAccountBalance: $responseBody['OrgAccountBalance'],
+            ThirdPartyTransID: $responseBody['ThirdPartyTransID'],
+            MSISDN: $responseBody['MSISDN'],
+            FirstName: $responseBody['FirstName'],
+            MiddleName: $responseBody['MiddleName'],
+            LastName: $responseBody['LastName'],
+        );
+
+    }
+
+    public function toArray(): array
+    {
+        return [];
+    }
 }

@@ -4,7 +4,9 @@
 namespace Rickodev\Mpesa;
 
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
+use GuzzleHttp\Exception\GuzzleException;
 use Rickodev\Mpesa\Configs\BaseConfig;
 
 abstract class DarajaService
@@ -18,7 +20,6 @@ abstract class DarajaService
 
         $defaults = [
             'base_uri' => $this->getBaseUrl(),
-            'timeout' => 2.0,
             'http_errors' => true,
             'headers' => [
                 "Content-Type" => ["application/json"],
@@ -51,6 +52,7 @@ abstract class DarajaService
     }
 
 
+
     protected function getToken(): string
     {
         $credentials = $this->getCredentials();
@@ -72,7 +74,7 @@ abstract class DarajaService
 
             return $responseObj->access_token;
 
-        } catch (ClientException $e) {
+        } catch (BadResponseException|\Exception|GuzzleException $e) {
 
             return "";
         }

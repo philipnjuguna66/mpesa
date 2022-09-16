@@ -9,6 +9,7 @@ use GuzzleHttp\Psr7\Response;
 use Rickodev\Mpesa\Configs\PinLessDealerConfig;
 use Rickodev\Mpesa\PinLessDealer;
 use PHPUnit\Framework\TestCase;
+use Rickodev\Mpesa\Results\PinLessDealer\PinLessDealerSuccessFulResponse;
 
 class PinLessDealerTest extends TestCase
 {
@@ -16,7 +17,7 @@ class PinLessDealerTest extends TestCase
     /**
      * @throws GuzzleException
      */
-    public function testC2sRecharge()
+    public function testSuccessfulC2sRecharge()
     {
         $successfulToken = [
             "access_token" => "sdaswfdsfdsewrewre",
@@ -48,11 +49,41 @@ class PinLessDealerTest extends TestCase
 
         $response  = $c2s->c2sRecharge(phoneNumber: "748248523",amountInKsh:100);
 
-        $responseBody =  $response->getBody()->getContents();
+       $this->assertInstanceOf(PinLessDealerSuccessFulResponse::class,$response->data);
 
-        $responseBodyObject = json_decode($responseBody);
+    }
 
-        $this->assertEquals('26772-3250989-5',$responseBodyObject->responseId);
+    public function testItHandlesErrors()
+    {
+        $invalid = [
+            "access_token" => "sdaswfdsfdsewrewre",
+            "expires_in" => "3599"
 
+        ];
+
+        $errorBody = [
+            "requestId" => "11728-2929992-1",
+            "errorCode" => "401.002.01",
+            "errorMessage" => "Error Occurred - Invalid Access Token - BJGFGOXv5aZnw90KkA4TDtu4Xdyf"
+        ];
+
+        $mock = new MockHandler([
+            new Response(200,body:json_encode($invalid)),
+            new Response(401,body:json_encode($errorBody)),
+        ]);
+
+        $handlerStack = HandlerStack::create($mock);
+
+        $configuration = new PinLessDealerConfig(
+            key: 'unhkI9kwSDj1SOGq1C88UTARBfVnS963',
+            secret: 'PPYxwx1hGgJtFq1U',
+            servicePin: 9090,
+            senderMsisdn:'748248717'
+        );
+        $c2s = new PinLessDealer(configuration: $configuration,overrides: ['handler'=> $handlerStack]);
+
+        $response  = $c2s->c2sRecharge(phoneNumber: "748248523",amountInKsh:100);
+
+        $this->assertEquals("Error Occurred - Invalid Access Token - BJGFGOXv5aZnw90KkA4TDtu4Xdyf",$response->message);
     }
 }

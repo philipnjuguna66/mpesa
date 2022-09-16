@@ -6,7 +6,11 @@ namespace Rickodev\Mpesa;
 
 
 
+use GuzzleHttp\Exception\BadResponseException;
+use GuzzleHttp\Exception\GuzzleException;
 use Rickodev\Mpesa\Configs\C2BConfig;
+use Rickodev\Mpesa\Http\BaseDarajaResponse;
+use Rickodev\Mpesa\Results\LNM\STkResponseResult;
 
 class DarajaStk extends DarajaService
 {
@@ -21,7 +25,8 @@ class DarajaStk extends DarajaService
     }
 
 
-    public function send(string $phone, int $amount, string $reference = "test", string $description = "Transaction Description", string $remark = "Remarks"): \Psr\Http\Message\ResponseInterface
+
+    public function send(string $phone, int $amount, string $reference = "test", string $description = "Transaction Description", string $remark = "Remarks",string $transactionType = "CustomerPayBillOnline"):BaseDarajaResponse
     {
 
         $phone = format_safaricom_number($phone);
@@ -32,12 +37,13 @@ class DarajaStk extends DarajaService
 
         $token = $this->getToken();
 
+
         $requestData = array(
             "BusinessShortCode" => $this->config->shortCode,
             "Password" => $password,
             "Timestamp" => $timestamp,
-            "TransactionType" => "CustomerPayBillOnline",
-            "Amount" => round($amount),
+            "TransactionType" =>$transactionType,
+            "Amount" => $amount,
             "PartyA" => $phone,
             "PartyB" => $this->config->shortCode,
             "PhoneNumber" => $phone,
@@ -47,11 +53,30 @@ class DarajaStk extends DarajaService
             "Remark" => $remark,
         );
 
-        return $this->getClient()->post('mpesa/stkpush/v1/processrequest', [
-            'json' => $requestData,
-            'headers' => [
-                "Authorization" => "Bearer $token",
-            ]
-        ]);
+        try {
+            $response = $this->getClient()->post("mpesa/stkpush/v1/processrequest", [
+                'json' => $requestData,
+                'headers' => [
+                    "Authorization" => "Bearer $token",
+                ]
+            ]);
+
+            $response = $response->getBody()->getContents();
+
+            /** @var STkResponseResult $result */
+
+            $result = STkResponseResult::fromResponseObject(json_decode($response));
+
+            return BaseDarajaResponse::successful($result->ResponseDescription, $result);
+
+        } catch (BadResponseException $e) {
+
+            return BaseDarajaResponse::failed($e->getResponse()->getReasonPhrase(),data:null);
+
+        } catch (\Exception|GuzzleException $e) {
+
+            return BaseDarajaResponse::failed($e->getMessage(),data:null);
+
+        }
     }
 }

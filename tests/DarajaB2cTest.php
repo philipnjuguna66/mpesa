@@ -2,20 +2,17 @@
 
 namespace Rickodev\Mpesa\Tests;
 
-use GuzzleHttp\Exception\ClientException;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
 use Rickodev\Mpesa\Configs\B2cConfig;
 use Rickodev\Mpesa\DarajaB2C;
+use Rickodev\Mpesa\Results\B2C\B2CSuccessfulResponseResult;
+use Rickodev\Mpesa\Results\BaseErrorResponseResult;
 
 class DarajaB2cTest extends \PHPUnit\Framework\TestCase
 {
 
-    /**
-     * @throws GuzzleException
-     */
     public function test_successful_b2c_request_response()
     {
 
@@ -45,33 +42,22 @@ class DarajaB2cTest extends \PHPUnit\Framework\TestCase
             key: 'unhkI9kwSDj1SOGq1C88UTARBfVnS963',
             secret: 'PPYxwx1hGgJtFq1U',
             shortCode: '600997',
-            resultsUrl: 'https://mydomain.com/validation',
-            timeOutUrl: 'https://mydomain.com/path',
+            resultsUrl: 'https://mydomain.com/results',
+            timeOutUrl: 'https://mydomain.com/timeout',
             initiatorName: 'testapi',
             initiatorPassword: 'Safaricom999!*!'
         );
 
         $b2c = new DarajaB2C(configuration: $configuration,overrides: ['handler'=> $handlerStack]);
 
-        $response = $b2c->send(phone:'254708374149');
+        $response = $b2c->send(phone:'254708374149',amount: 10);
 
-        $responseBody =  $response->getBody()->getContents();
-
-        $object = json_decode($responseBody);
-
-        $this->assertEquals('AG_20191219_00005797af5d7d75f652',$object->ConversationID);
-        $this->assertEquals('0',$object->ResponseCode);
-        $this->assertEquals('Accept the service request successfully.',$object->ResponseDescription);
+       $this->assertInstanceOf(B2CSuccessfulResponseResult::class,$response->data);
     }
 
-    /**
-     * @throws GuzzleException
-     */
+
     public function test_erroneous_b2c_request_response()
     {
-
-        $this->expectException(ClientException::class);
-
         $invalidToken = [
             "access_token" => "BJGFGOXv5aZnw90KkA4TDtu4Xdyf",
             "expires_in" => "3599"
@@ -95,25 +81,19 @@ class DarajaB2cTest extends \PHPUnit\Framework\TestCase
             key: 'unhkI9kwSDj1SOGq1C88UTARBfVnS963',
             secret: 'PPYxwx1hGgJtFq1U',
             shortCode: '600997',
-            resultsUrl: 'https://mydomain.com/validation',
-            timeOutUrl: 'https://mydomain.com/path',
+            resultsUrl: 'https://mydomain.com/results',
+            timeOutUrl: 'https://mydomain.com/timeout',
             initiatorName: 'testapi',
             initiatorPassword: 'Safaricom999!*!'
         );
 
         $b2c = new DarajaB2C(configuration: $configuration,overrides: ['handler'=> $handlerStack]);
 
-        $response = $b2c->send(phone:'254708374149');
+        $response = $b2c->send(phone:'254708374149',amount: 10);
 
-        $responseBody =  $response->getBody()->getContents();
+        $this->assertInstanceOf(BaseErrorResponseResult::class,$response->data);
 
-        $responseBodyObject = json_decode($responseBody);
-
-        $this->assertEquals('11728-2929992-1',$responseBodyObject->requestId);
-        $this->assertEquals('401.002.01',$responseBodyObject->errorCode);
-        $this->assertEquals('Error Occurred - Invalid Access Token - BJGFGOXv5aZnw90KkA4TDtu4Xdyf',$responseBodyObject->errorMessage);
-
-
+        $this->assertEquals("Error Occurred - Invalid Access Token - BJGFGOXv5aZnw90KkA4TDtu4Xdyf",$response->message);
     }
 
 }
