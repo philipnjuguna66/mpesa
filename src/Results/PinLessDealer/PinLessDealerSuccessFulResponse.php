@@ -2,7 +2,9 @@
 namespace Rickodev\Mpesa\Results\PinLessDealer;
 
 
-class PinLessDealerSuccessFulResponse implements \Rickodev\Mpesa\Results\BaseResult
+use Rickodev\Mpesa\Results\BaseResult;
+
+class PinLessDealerSuccessFulResponse implements BaseResult
 {
 
     public function __construct(
@@ -14,7 +16,7 @@ class PinLessDealerSuccessFulResponse implements \Rickodev\Mpesa\Results\BaseRes
     {
     }
 
-    public static function fromResponseObject(object $responseBody): \Rickodev\Mpesa\Results\BaseResult
+    public static function fromResponseObject(object $responseBody): BaseResult
     {
         return  new self(
             responseId: $responseBody->responseId,
@@ -24,7 +26,7 @@ class PinLessDealerSuccessFulResponse implements \Rickodev\Mpesa\Results\BaseRes
         );
     }
 
-    public static function fromResponseArray(array $responseBody): \Rickodev\Mpesa\Results\BaseResult
+    public static function fromResponseArray(array $responseBody): BaseResult
     {
         return  new self(
             responseId: $responseBody['responseId'],

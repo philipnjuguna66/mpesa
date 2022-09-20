@@ -7,6 +7,7 @@ use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Handler\MockHandler;
 use GuzzleHttp\HandlerStack;
 use GuzzleHttp\Psr7\Response;
+use PHPUnit\Framework\TestCase;
 use Rickodev\Mpesa\Configs\C2BConfig;
 use Rickodev\Mpesa\DarajaC2B;
 use Rickodev\Mpesa\Http\BaseDarajaResponse;
@@ -14,10 +15,9 @@ use Rickodev\Mpesa\Results\C2B\C2BV1Result;
 use Rickodev\Mpesa\Results\C2B\C2BV2Result;
 
 
-class DarajaC2BTest extends \PHPUnit\Framework\TestCase
+class DarajaC2BTest extends TestCase
 {
     /**
-     * @throws GuzzleException
      */
     public function test_c2b_v1_urls_can_be_registered()
     {
@@ -153,7 +153,6 @@ class DarajaC2BTest extends \PHPUnit\Framework\TestCase
 
         $ConfirmationResponseBodyObject = json_decode($ConfirmationResponseBody);
 
-        $this->assertInstanceOf(C2BV2Result::class,C2BV2Result::fromResponseObject($ValidationResponseBodyObject));
         $this->assertInstanceOf(C2BV2Result::class,C2BV2Result::fromResponseObject($ConfirmationResponseBodyObject));
 
     }

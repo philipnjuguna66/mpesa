@@ -15,7 +15,6 @@ class PinLessDealerTest extends TestCase
 {
 
     /**
-     * @throws GuzzleException
      */
     public function testSuccessfulC2sRecharge()
     {

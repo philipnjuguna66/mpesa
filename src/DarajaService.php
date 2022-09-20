@@ -3,6 +3,7 @@
 
 namespace Rickodev\Mpesa;
 
+use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\ClientException;
@@ -74,7 +75,7 @@ abstract class DarajaService
 
             return $responseObj->access_token;
 
-        } catch (BadResponseException|\Exception|GuzzleException $e) {
+        } catch (BadResponseException|Exception|GuzzleException $e) {
 
             return "";
         }
@@ -90,7 +91,7 @@ abstract class DarajaService
     }
 
 
-    protected function getSandBoxEncryptedPasswd($plaintext)
+    protected function getSandBoxEncryptedPasswd($plaintext): string
     {
         $pk = $this->getSandBoxPublicKey();
         openssl_public_encrypt($plaintext, $encrypted, $pk, OPENSSL_PKCS1_PADDING);
@@ -102,7 +103,7 @@ abstract class DarajaService
         return file_get_contents(__DIR__ . '/Configs/mpesa_public_cert.cer');
     }
 
-    protected function getLiveEncryptedPasswd($plaintext)
+    protected function getLiveEncryptedPasswd($plaintext): string
     {
         $pk = $this->getLivePublicKey();
         openssl_public_encrypt($plaintext, $encrypted, $pk, OPENSSL_PKCS1_PADDING);

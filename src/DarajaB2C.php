@@ -16,6 +16,7 @@ use Rickodev\Mpesa\Results\BaseErrorResponseResult;
 
 class DarajaB2C extends DarajaService
 {
+
     protected Configs\BaseConfig $config;
 
     public function __construct(private B2cConfig $configuration, array $overrides = [])
@@ -75,5 +76,56 @@ class DarajaB2C extends DarajaService
             return BaseDarajaResponse::failed($e->getMessage(),data:null);
 
         }
+    }
+
+    public function reverse(string $transactionID,int $amount,string $remarks = 'RemarK:Reversal',string $occassion = 'Occasion:Reversal'): BaseDarajaResponse
+    {
+
+        $token = $this->getToken();
+
+        $encryptedPassword = $this->isLive() ? $this->getLiveEncryptedPasswd($this->config->initiatorPassword) : $this->getSandBoxEncryptedPasswd($this->config->initiatorPassword);
+
+        $requestData =  [
+            "Initiator" => $this->config->initiatorName,
+            "SecurityCredential" => $encryptedPassword,
+            "CommandID" => "TransactionReversal",
+            "TransactionID" => $transactionID,
+            "Amount" => $amount,
+            "ReceiverParty" => $this->config->shortCode,
+            "RecieverIdentifierType" => 11,
+            "ResultURL" => $this->config->resultsUrl,
+            "QueueTimeOutURL" => $this->config->timeOutUrl,
+            "Remarks" => $remarks,
+            "Occasion" => $occassion
+        ];
+
+        try {
+            $response = $this->getClient()->post('mpesa/reversal/v1/request', [
+                'json' => $requestData,
+                'headers' => [
+                    "Authorization" => "Bearer $token",
+                ]
+            ]);
+
+            $response = $response->getBody()->getContents();
+
+            $result = B2CSuccessfulResponseResult::fromResponseObject(json_decode($response));
+
+            return BaseDarajaResponse::successful($result->ResponseDescription,data: $result);
+
+        } catch (BadResponseException $e) {
+
+            $errorResponse = $e->getResponse()->getBody()->getContents();
+
+            $errorResponse =  BaseErrorResponseResult::fromResponseObject(json_decode($errorResponse));
+
+            return BaseDarajaResponse::failed($errorResponse->errorMessage,data: $errorResponse);
+
+        } catch (Exception|GuzzleException $e) {
+
+            return BaseDarajaResponse::failed($e->getMessage(),data:null);
+
+        }
+
     }
 }

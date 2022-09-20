@@ -6,6 +6,7 @@ namespace Rickodev\Mpesa;
 
 
 
+use Exception;
 use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
 use Rickodev\Mpesa\Configs\C2BConfig;
@@ -73,7 +74,7 @@ class DarajaStk extends DarajaService
 
             return BaseDarajaResponse::failed($e->getResponse()->getReasonPhrase(),data:null);
 
-        } catch (\Exception|GuzzleException $e) {
+        } catch (Exception|GuzzleException $e) {
 
             return BaseDarajaResponse::failed($e->getMessage(),data:null);
 
