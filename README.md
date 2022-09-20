@@ -15,10 +15,18 @@ You can install the package via composer:
 composer require rickodev/mpesa
 ```
 
+### add to composer.json
+
+
 ## Usage
 
-```php
-// Usage description here
+```php   
+"repositories": [
+    {
+        "type": "vcs",
+        "url": "https://github.com/rickoDEv/mpesa"
+    }
+
 ```
 
 ### Testing
